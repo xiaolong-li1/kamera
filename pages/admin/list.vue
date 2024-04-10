@@ -74,7 +74,7 @@ const uClick = async () => {
 const dataHandle = async () => {
   loading.value = true
   try {
-    const { total, totalPage, pageNum, pageSize, data } = await $fetch('/api/getFileList', {
+    const res = await $fetch('/api/getFileList', {
       timeout: 60000,
       method: 'post',
       headers: {
@@ -82,9 +82,11 @@ const dataHandle = async () => {
       },
       body: { pageNum: pageInfo.pageNum, pageSize: pageInfo.pageSize, type: type.value },
     })
-    dataList.value = data
-    pageInfo.total = total
-    pageInfo.totalPage = totalPage
+    if (res?.code === 200) {
+      dataList.value = res?.data.data
+      pageInfo.total = res?.data.total
+      pageInfo.totalPage = res?.data.totalPage
+    }
   } catch (e) {
     console.log(e)
     toast.add({ title: '加载失败！', timeout: 2000, color: 'red' })
@@ -95,7 +97,7 @@ const dataHandle = async () => {
 
 const updateHandle = async () => {
   try {
-    const { data } = await $fetch('/api/updateImgInfo', {
+    const res = await $fetch('/api/updateImgInfo', {
       timeout: 60000,
       method: 'put',
       headers: {
@@ -103,7 +105,7 @@ const updateHandle = async () => {
       },
       body: { id: objInfo.id, type: objInfo.type, rating: objInfo.rating, detail: objInfo.detail, url: objInfo.url, sort: objInfo.sort },
     })
-    if (data === 0) {
+    if (res?.code === 200) {
       toast.add({ title: '更新成功！', timeout: 2000 })
       await uClick()
       await dataHandle()
@@ -118,7 +120,7 @@ const updateHandle = async () => {
 
 const deleteHandle = async (id: number) => {
   try {
-    const { data } = await $fetch('/api/deleteImg', {
+    const res = await $fetch('/api/deleteImg', {
       timeout: 60000,
       method: 'delete',
       headers: {
@@ -126,7 +128,7 @@ const deleteHandle = async (id: number) => {
       },
       body: { id: id },
     })
-    if (data === 0) {
+    if (res?.code === 200) {
       toast.add({ title: '删除成功！', timeout: 2000 })
       await dataHandle()
     } else {
@@ -141,7 +143,7 @@ const deleteHandle = async (id: number) => {
 const updateShowHandle = async (val: number, id: number) => {
   showBtnLoading.value = true
   try {
-    const { data } = await $fetch('/api/updateShow', {
+    const res = await $fetch('/api/updateShow', {
       timeout: 60000,
       method: 'put',
       headers: {
@@ -149,7 +151,7 @@ const updateShowHandle = async (val: number, id: number) => {
       },
       body: { id: id, show: val },
     })
-    if (data === 0) {
+    if (res?.code === 200) {
       toast.add({ title: '更新成功！', timeout: 2000 })
       showBtnLoading.value = false
       await dataHandle()

@@ -7,12 +7,7 @@ export default defineEventHandler(async (req) => {
   try {
     const { err } = jwt.verify(token, secretKey)
   } catch (e) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized',
-    })
+    return Response.json({ code: 401, message: 'Unauthorized', data: null })
   }
-  return {
-    data: 0,
-  }
+  return Response.json({ code: 200, message: '放行', data: null })
 })

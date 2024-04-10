@@ -63,7 +63,7 @@ async function onRequestUpload(option: any) {
     formData.append('storage', storage.value || '')
     formData.append('type', imgData.type || '')
     formData.append('mountPath', imgData.mountPath || '')
-    const { data, url } = await $fetch('/api/uploadFile', {
+    const res: any = await $fetch('/api/uploadFile', {
       timeout: 60000,
       method: 'post',
       headers: {
@@ -71,8 +71,9 @@ async function onRequestUpload(option: any) {
       },
       body: formData,
     })
-    if (data === 0) {
-      fileUrl.value = url
+    if (res?.code === 200) {
+      fileUrl.value = res.data?.url
+      imgData.url = res.data?.url
       const tags = await ExifReader.load(file)
       exif.make = tags?.Make?.description
       exif.model = tags?.Model?.description
@@ -90,15 +91,15 @@ async function onRequestUpload(option: any) {
       exif.color_space = tags?.ColorSpace?.description
       exif.white_balance = tags?.WhiteBalance?.description
       imgData.exif = exif
-      imgData.url = url
     }
   } catch (e) {
+    console.log(e)
     if (e?.status === 413) {
       toast.add({ title: '上传文件大小超出限制！', timeout: 2000, color: 'red' })
+      option.file.abort()
     } else {
-      toast.add({ title: '图片上传/解析失败！', timeout: 2000, color: 'red' })
+      toast.add({ title: e?.message, timeout: 2000, color: 'red' })
     }
-    option.file.abort()
   }
 }
 
@@ -121,7 +122,7 @@ async function submit() {
       return
     }
     try {
-      const { data } = await $fetch('/api/addImg', {
+      const res = await $fetch('/api/addImg', {
         timeout: 60000,
         method: 'post',
         headers: {
@@ -129,7 +130,7 @@ async function submit() {
         },
         body: imgData,
       })
-      if (data === 0) {
+      if (res?.code === 200) {
         toast.add({ title: '保存成功！', timeout: 2000 })
       } else {
         toast.add({ title: '保存失败！', timeout: 2000, color: 'red' })
@@ -194,16 +195,16 @@ watch(storage, async (val) => {
     if (mountOptions.value.length === 0) {
       try {
         toast.add({ title: '正在获取 AList 挂载目录！', timeout: 2000 })
-        const { data } = await $fetch('/api/getStorageList', {
+        const res = await $fetch('/api/getStorageList', {
           timeout: 60000,
           method: 'get',
           headers: {
             Authorization: `${user.tokenName} ${user.token}`,
           },
         })
-        if (data) {
+        if (res?.code === 200) {
           // 遍历数组，给 mountOptions 赋值
-          data.forEach((item: any) => {
+          res?.data.forEach((item: any) => {
             if (item.status === 'work') {
               mountOptions.value.push({
                 label: item.mount_path,
