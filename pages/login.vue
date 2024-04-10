@@ -30,17 +30,17 @@ const validate = (state: any): FormError[] => {
 async function handleSubmitClick(event: FormSubmitEvent<any>) {
   loading.value = true
   try {
-    const { token, tokenName } = await $fetch('/api/login', {
+    const res = await $fetch('/api/login', {
       method: 'post',
       body: { username: loginForm.username, password: loginForm.password },
     })
-    user.setToken(token)
-    user.setTokenName(tokenName)
-    router.push('/admin')
-    if (token) {
+    if (res?.code === 200) {
+      user.setToken(res?.data.token)
+      user.setTokenName(res?.data.tokenName)
       toast.add({ title: '登录成功！', timeout: 2000 })
+      router.push('/admin')
     } else {
-      toast.add({ title: 'token 获取异常，登录失败！', timeout: 2000, color: 'red' })
+      toast.add({ title: res?.message, timeout: 2000, color: 'red' })
     }
   } catch (e) {
     if (e?.status === 500) {

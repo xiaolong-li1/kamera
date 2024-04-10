@@ -58,17 +58,17 @@ const userState = reactive({
 const onSubmitUser = async (event: FormSubmitEvent<any>) => {
   userLoading.value = true
   try {
-    const { data } = await $fetch('/api/updatePwd', {
+    const res = await $fetch('/api/updatePwd', {
       method: 'post',
       headers: {
         Authorization: `${user.tokenName} ${user.token}`,
       },
       body: userState,
     })
-    if (data === 0) {
+    if (res?.code === 200) {
       toast.add({ title: '更新成功！', timeout: 2000 })
     } else {
-      toast.add({ title: '更新失败！', timeout: 2000, color: 'red' })
+      toast.add({ title: res?.message, timeout: 2000, color: 'red' })
     }
   } catch (e) {
     toast.add({ title: '更新失败！', timeout: 2000, color: 'red' })
@@ -80,13 +80,15 @@ const onSubmitUser = async (event: FormSubmitEvent<any>) => {
 const getStorageInfo = async () => {
   storageLoading.value = true
   try {
-    const { data } = await $fetch('/api/getStorageInfo', {
+    const res = await $fetch('/api/getStorageInfo', {
       method: 'get',
       headers: {
         Authorization: `${user.tokenName} ${user.token}`,
       },
     })
-    storageInfo.value = data
+    if (res?.code === 200) {
+      storageInfo.value = res?.data
+    }
   } catch (e) {
     console.log(e)
   } finally {
@@ -127,14 +129,14 @@ const xClick = async () => {
 
 const updateS3 = async () => {
   try {
-    const { data } = await $fetch('/api/updateS3Info', {
+    const res= await $fetch('/api/updateS3Info', {
       method: 'put',
       headers: {
         Authorization: `${user.tokenName} ${user.token}`,
       },
       body: s3State,
     })
-    if (data === 0) {
+    if (res?.code === 200) {
       toast.add({ title: '更新成功！', timeout: 2000 })
       await xClick()
       await getStorageInfo()
@@ -149,14 +151,14 @@ const updateS3 = async () => {
 
 const updateAlist = async () => {
   try {
-    const { data } = await $fetch('/api/updateAListInfo', {
+    const res = await $fetch('/api/updateAListInfo', {
       method: 'put',
       headers: {
         Authorization: `${user.tokenName} ${user.token}`,
       },
       body: alistState,
     })
-    if (data === 0) {
+    if (res?.code === 200) {
       toast.add({ title: '更新成功！', timeout: 2000 })
       await xClick()
       await getStorageInfo()

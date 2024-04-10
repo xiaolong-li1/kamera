@@ -10,14 +10,17 @@ const dataInfo = ref({})
 const dataHandle = async () => {
   loading.value = true
   try {
-    const { data } = await $fetch('/api/console', {
+    const res = await $fetch('/api/console', {
       timeout: 60000,
       method: 'get',
       headers: {
         Authorization: `${user.tokenName} ${user.token}`,
       },
     })
-    dataInfo.value = data
+    if (res?.code !== 200) {
+      toast.add({ title: '请求失败！', timeout: 2000, color: 'red' })
+    }
+    dataInfo.value = res?.data
   } catch (e) {
     console.log(e)
     toast.add({ title: '数据获取失败！', timeout: 2000, color: 'red' })
