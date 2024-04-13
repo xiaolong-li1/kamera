@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
+import { breakpointsTailwind, useBreakpoints, useDateFormat, useNow } from '@vueuse/core'
 import type { FormError, FormSubmitEvent } from '#ui/types'
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
@@ -7,6 +7,7 @@ const mdAndLarger = breakpoints.greaterOrEqual('md')
 const toast = useToast()
 const userLoading = ref<boolean>(false)
 const storageLoading = ref<boolean>(false)
+const backupLoading = ref<boolean>(false)
 const storageInfo = ref()
 const user = useUserStore()
 const showS3Modal = ref<boolean>(false)
@@ -171,6 +172,39 @@ const updateAlist = async () => {
   }
 }
 
+const backupHandle = async () => {
+  try {
+    backupLoading.value = true
+    const res = await $fetch('/api/getImageJson', {
+      method: 'get',
+      headers: {
+        Authorization: `${user.tokenName} ${user.token}`,
+      },
+    })
+    if (res?.code === 200) {
+      toast.add({ title: '备份数据获取成功！', timeout: 2000 })
+      const blob = new Blob([JSON.stringify(res?.data)], {
+        type: 'application/json',
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      const formatted = useDateFormat(useNow(), 'YYYY-MM-DD-HH-mm-ss')
+      a.download = `kamera-backup-${formatted.value}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+    } else {
+      toast.add({ title: '备份数据获取失败！', timeout: 2000, color: 'red' })
+    }
+  } catch (e) {
+    console.log(e)
+    toast.add({ title: '备份数据获取失败！', timeout: 2000, color: 'red' })
+  } finally {
+    backupLoading.value = false
+  }
+}
+
 onMounted(async () => {
   await getStorageInfo()
 })
@@ -205,6 +239,21 @@ definePageMeta({
                 </UButton>
               </UForm>
             </div>
+            <UDivider
+              label="备份"
+              my-2
+              :ui="{ label: 'text-primary-500 dark:text-primary-400' }"
+            />
+            <UButton
+              icon="i-carbon-data-backup"
+              size="sm"
+              color="white"
+              variant="solid"
+              label="备份"
+              :trailing="false"
+              @click="backupHandle"
+              :loading="backupLoading"
+            />
           </el-card>
         </div>
       </template>
