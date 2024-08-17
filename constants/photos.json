@@ -1,10 +1,5 @@
 [
     {
-        "title": "Cosplay",
-        "url": "/cosplay",
-        "icon": "i-carbon-camera"
-    },
-    {
         "title": "集邮",
         "url": "/tietie",
         "icon": "i-carbon-thumbs-up"
@@ -13,5 +8,20 @@
         "title": "时光相册",
         "url": "/timeline",
         "icon": "i-carbon-image-search"
+    },
+    {
+        "title": "信箱",
+        "url": "/mailbox",
+        "icon": ""
+    },
+    {
+        "title": "Magic_Card",
+        "url": "/magic_card",
+        "icon": "i-carbon-chat"
+    }
+    {
+        "title": "留言板",
+        "url": "/message",
+        "icon": "i-carbon-chat"
     }
 ]
